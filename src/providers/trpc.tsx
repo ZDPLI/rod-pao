@@ -13,6 +13,11 @@ const trpcClient = trpc.createClient({
     httpBatchLink({
       url: "/api/trpc",
       transformer: superjson,
+      headers() {
+        // Include demo auth token if present
+        const token = localStorage.getItem("demo_auth_token");
+        return token ? { "x-demo-token": token } : {};
+      },
       fetch(input, init) {
         return globalThis.fetch(input, {
           ...(init ?? {}),

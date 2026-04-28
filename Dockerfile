@@ -1,27 +1,20 @@
-# ============================================
-# Dockerfile для ГБУЗ "РОД" ПАО на Railway
-# Fullstack: Vite React frontend + Hono backend
-# ============================================
+# Railway Dockerfile
+# Backend runs via tsx (no bundling needed)
+# Frontend is built with Vite
 
 FROM node:20-alpine
 
 WORKDIR /app
 
-# 1. Install dependencies first (for better caching)
+# Install dependencies
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
-
-# 2. Re-install devDependencies needed for build
 RUN npm ci
 
-# 3. Copy source code
+# Copy source code
 COPY . .
 
-# 4. Build everything (frontend + backend)
+# Build frontend only
 RUN npm run build
-
-# 5. Remove devDependencies for production
-RUN npm prune --omit=dev
 
 # Environment
 ENV NODE_ENV=production
@@ -33,4 +26,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget -qO- http://localhost:3000/api/health || exit 1
 
-CMD ["node", "dist/boot.js"]
+# Start with tsx (runs TypeScript directly)
+CMD ["npx", "tsx", "api/boot.ts"]

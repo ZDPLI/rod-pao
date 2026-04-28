@@ -1,4 +1,5 @@
 import { authRouter } from "./auth-router";
+import { demoAuthRouter } from "./demo-auth-router";
 import { createRouter, publicQuery } from "./middleware";
 import { categoryRouter } from "./routers/category";
 import { serviceRouter } from "./routers/service";
@@ -8,6 +9,7 @@ import { settingsRouter } from "./routers/settings";
 export const appRouter = createRouter({
   ping: publicQuery.query(() => ({ ok: true, ts: Date.now() })),
   auth: authRouter,
+  demoAuth: demoAuthRouter,
   category: categoryRouter,
   service: serviceRouter,
   content: contentRouter,

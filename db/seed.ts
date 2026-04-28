@@ -1,9 +1,18 @@
 import { getDb } from "../api/queries/connection";
-import { categories, services, contents, settings } from "./schema";
+import { categories, services, contents, settings, users } from "./schema";
 
 async function seed() {
   const db = getDb();
   console.log("Seeding database...");
+
+  // Seed demo admin user (for access without OAuth)
+  await db.insert(users).values({
+    unionId: "demo-admin",
+    name: "Администратор",
+    email: "admin@rod.ru",
+    role: "admin",
+  });
+  console.log("Demo admin user created (unionId: demo-admin)");
 
   // Seed categories
   await db.insert(categories).values([
