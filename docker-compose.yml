@@ -1,0 +1,55 @@
+# ============================================
+# Docker Compose для локального тестирования
+# Запуск: docker-compose up --build
+# ============================================
+
+version: "3.8"
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: rod_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rod_root_password
+      MYSQL_DATABASE: rod_pao
+      MYSQL_USER: rod_user
+      MYSQL_PASSWORD: rod_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rod_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: mysql://rod_user:rod_password@mysql:3306/rod_pao
+      APP_ID: ${APP_ID}
+      APP_SECRET: ${APP_SECRET}
+      VITE_APP_ID: ${VITE_APP_ID}
+      VITE_KIMI_AUTH_URL: ${VITE_KIMI_AUTH_URL}
+      KIMI_AUTH_URL: ${KIMI_AUTH_URL}
+      KIMI_OPEN_URL: ${KIMI_OPEN_URL}
+      OWNER_UNION_ID: ${OWNER_UNION_ID}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: >
+      sh -c "npm run db:push && node db/seed.ts && node dist/boot.js"
+
+volumes:
+  mysql_data:
